@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courier Fee Application</title>
+    <link rel="stylesheet" href="/interface.css">
+</head>
+<body>
+<div class="flexbox">
+    <div class="title">Courier Fee Calculator</div>
+    <div class="row">
+        <select id="citySelect" class="dropdown">
+            <option value="">Select City</option>
+            <option value="Tallinn-Harku">Tallinn</option>
+            <option value="Tartu-Tõravere">Tartu</option>
+            <option value="Pärnu">Pärnu</option>
+        </select>
+        <select id="vehicleSelect" class="dropdown">
+            <option value="">Select Vehicle</option>
+            <option value="Car">Car</option>
+            <option value="Scooter">Scooter</option>
+            <option value="Bike">Bike</option>
+        </select>
+    </div>
+    <button id="getDataButton">Calculate fee</button>
+    <div id="output" class="result"></div>
+</div>
+<script>
+document.getElementById("getDataButton").addEventListener("click", function() {
+    var location = document.getElementById("citySelect").value;
+    var vehicle = document.getElementById("vehicleSelect").value;
+
+    var url = "/api/data?location=" + encodeURIComponent(location) + "&vehicle=" + encodeURIComponent(vehicle);
+
+    fetch(url)
+        .then(response => response.text()) // Read response as text
+        .then(data => {
+            document.getElementById("output").innerText = data;
+
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+});
+    </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+.title{
+    margin-top: 10px;
+    background-color: green;
+    font-size: 20px;
+    border-radius: 5px;
+    color: white;
+
+
+}
+
+.flexbox{
+    display: flex;
+    flex-direction: column; /* Elements inside should be arranged vertically */
+    height: 400px;
+    width: 100%;
+    margin: auto;
+    width: 35%;
+    min-width: 270px;
+    background-color: rgb(51, 51, 51);
+    border-radius: 15px;
+    margin-top: 100px;
+    align-items: center;
+    max-width: 610px;
+}
+.row {
+    display: flex;
+    justify-content: space-between; /* Elements inside should be arranged horizontally with space in between */
+    align-items: center;
+    width: 90%;
+    margin-left: 5%;
+    margin-right: 5%;
+    margin-top: 50px
+}
+.dropdown{
+    font-size: 15px;
+    width: 120px;
+    height: 40px;
+}
+button{
+    width: 25%;
+    max-width: 170px;
+    min-width: 80px;
+    font-size: 15px;
+    margin-top: 80px;
+    height: 40px;
+    margin-bottom: 25px;
+    border-radius: 5px;
+
+
+}
+.result{
+    background-color: green;
+    max-width: 80%;
+    border-radius: 5px;
+    font-size: 18px;
+    color: white;
+}
+
