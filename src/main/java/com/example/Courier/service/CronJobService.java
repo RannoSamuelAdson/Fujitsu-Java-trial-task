@@ -31,13 +31,13 @@ public class CronJobService {
 
     @Scheduled(cron = "0 15 * * * *") // Run every hour, 15 minutes and 0 seconds into that hour
     public void updateWeatherData() {
-        updateDatabase(weatherRepo);
+        updateDatabase(weatherRepo, "https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php");
     }
 
-    public static void updateDatabase(WeatherRepo repo){
+    public static void updateDatabase(WeatherRepo repo, String urlString){
         try {
             System.out.println("Updating database");
-            URL url = new URL("https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php");
+            URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
 

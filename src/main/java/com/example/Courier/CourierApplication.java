@@ -21,7 +21,7 @@ public class CourierApplication {
 	public static void main(String[] args) {
 		ConfigurableApplicationContext context = SpringApplication.run(CourierApplication.class, args);
 		repo = context.getBean(WeatherRepo.class);//get a database to work with
-		CronJobService.updateDatabase(repo);//insert values into database
+		CronJobService.updateDatabase(repo, "https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php");//insert values into database
 
 
 	}
