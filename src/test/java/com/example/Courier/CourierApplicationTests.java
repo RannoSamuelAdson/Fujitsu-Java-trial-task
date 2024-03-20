@@ -17,12 +17,7 @@ package com.example.Courier;
 	13. (location = "", vehicle = "") => return -200
 	* */
 	//determineWeatherSeverity(String phenomenon)
-	/*
-	1. (phenomenon = Hail) => return 4
-	2. (phenomenon = Moderate snow shower) => return 3
-	3. (phenomenon = Light rain) => return 2
-	4. (phenomenon = "") => return 1
-	 */
+
 	//calculateExtraFees(WeatherInput station, String vehicle)
 	/*
 	1.bike, temp is -5, weather 1, windspeed 15 return 1
@@ -128,4 +123,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 		void testCalculateRegionalBaseFee_EmptyLocationAndVehicle() {
 			assertEquals(-200.0, controller.calculateRegionalBaseFee("", ""));
 		}
+
+
+		/*
+	1. (phenomenon = Hail) => return 4
+	2. (phenomenon = Moderate snow shower) => return 3
+	3. (phenomenon = Light rain) => return 2
+	4. (phenomenon = "") => return 1
+	 */
+		@Test
+		void testdetermineWeatherSeverity_Hail() {
+			assertEquals(4, controller.determineWeatherSeverity("Hail"));
+		}
+		@Test
+		void testdetermineWeatherSeverity_Moderate_snow_shower() {
+			assertEquals(3, controller.determineWeatherSeverity("Moderate snow shower"));
+		}
+		@Test
+		void testdetermineWeatherSeverity_Light_rain() {
+			assertEquals(2, controller.determineWeatherSeverity("Light rain"));
+		}
+		@Test
+		void testdetermineWeatherSeverity_EmptyString() {
+			assertEquals(1, controller.determineWeatherSeverity(""));
+		}
+
 	}
