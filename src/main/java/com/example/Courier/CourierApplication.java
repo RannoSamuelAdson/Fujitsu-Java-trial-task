@@ -1,7 +1,6 @@
 package com.example.Courier;
 
 
-import com.example.Courier.model.WeatherInput;
 import com.example.Courier.repository.WeatherRepo;
 import com.example.Courier.service.CronJobService;
 
@@ -11,8 +10,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.util.Objects;
-import java.util.Optional;
 
 @SpringBootApplication
 @EnableScheduling

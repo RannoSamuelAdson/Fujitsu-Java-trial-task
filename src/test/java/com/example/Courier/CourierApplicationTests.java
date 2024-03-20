@@ -12,14 +12,12 @@ import com.example.Courier.service.CronJobService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.sql.Timestamp;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -200,7 +198,7 @@ import static org.mockito.Mockito.*;
 		when(weatherRepoMock.findById("Pärnu")).thenReturn(Optional.of(expectedWeatherInput));
 
 		// Act
-		WeatherInput result = controller.getStationData("Pärnu");
+		WeatherInput result = FeeController.getStationData("Pärnu");
 
 		// Assert
 		assertNotNull(result);
@@ -213,7 +211,7 @@ import static org.mockito.Mockito.*;
 		when(weatherRepoMock.findById("NonexistentStation")).thenReturn(Optional.empty());
 
 		// Act
-		WeatherInput result = controller.getStationData("NonexistentStation");
+		WeatherInput result = FeeController.getStationData("NonexistentStation");
 
 		// Assert
 		assertNotNull(result);
@@ -269,11 +267,58 @@ import static org.mockito.Mockito.*;
 
 	//getFeeRequestResponse(String location, String vehicle)
 	/*
-	1. location = "Pärnu", database empty: return "There was an issue with loading weather data. Check your internet connection."
-	2. vehicle = "Bike", windspeed = 25: return "Usage of selected vehicle type is forbidden"
-	3. location = "": return "Enter city name and vehicle before submitting."
-	4. location = "Tallinn-Harku", vehicle = car: return "The fee for this delivery is 4€."
+	1. (location = "Pärnu", vehicle = Car, database doesn't have Pärnu): return "There was an issue with loading weather data. Check your internet connection."
+	2. (location = "Pärnu", vehicle = Bike, windspeed = 25): return "Usage of selected vehicle type is forbidden"
+	3. (location = "", vehicle = ""): return "Enter city name and vehicle before submitting."
+	4. (location = "Tallinn-Harku", vehicle = Car): return "The fee for this delivery is 4€."
 	*/
+	@Test
+	void testgetFeeRequestResponse_Pärnu_Car_CityNotFound() {
+		// Arrange
+		when(weatherRepoMock.findById("Pärnu")).thenReturn(Optional.empty());
+
+		// Act
+		String response = controller.getFeeRequestResponse("Pärnu","Car");
+
+		// Assert
+		assertEquals(response, "There was an issue with loading weather data. Check your internet connection.");
+	}
+	@Test
+	void testgetFeeRequestResponse_Pärnu_Bike_WindSpeed25() {
+		// Arrange
+		WeatherInput station = new WeatherInput("Pärnu",41803,-5.0f,25.0f,"Moderate snow shower",new Timestamp(System.currentTimeMillis()));
+		when(weatherRepoMock.findById("Pärnu")).thenReturn(Optional.of(station));
+
+		// Act
+		String response = controller.getFeeRequestResponse("Pärnu","Bike");
+
+		// Assert
+		assertEquals(response, "Usage of selected vehicle type is forbidden");
+	}
+	@Test
+	void testgetFeeRequestResponse_EmptyLocationAndVehicle() {
+		// Arrange
+		//WeatherInput station = new WeatherInput("Pärnu",41803,-5.0f,25.0f,"Moderate snow shower",new Timestamp(System.currentTimeMillis()));
+		//when(weatherRepoMock.findById("Pärnu")).thenReturn(Optional.of(station));
+
+		// Act
+		String response = controller.getFeeRequestResponse("","");
+
+		// Assert
+		assertEquals(response, "Enter city name and vehicle before submitting.");
+	}
+	@Test
+	void testgetFeeRequestResponse_Tallinn_Car() {
+		// Arrange
+		WeatherInput station = new WeatherInput("Tallinn-Harku",41803,-5.0f,25.0f,"Moderate snow shower",new Timestamp(System.currentTimeMillis()));
+		when(weatherRepoMock.findById("Tallinn-Harku")).thenReturn(Optional.of(station));
+
+		// Act
+		String response = controller.getFeeRequestResponse("Tallinn-Harku","Car");
+
+		// Assert
+		assertEquals(response, "The fee for this delivery is 4.0€.");
+	}
 
 
 	}

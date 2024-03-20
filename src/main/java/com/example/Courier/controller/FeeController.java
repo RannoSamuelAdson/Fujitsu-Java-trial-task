@@ -1,9 +1,8 @@
 package com.example.Courier.controller;
 
 
-import com.example.Courier.CourierApplication;
+
 import com.example.Courier.model.WeatherInput;
-import com.example.Courier.repository.WeatherRepo;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +26,7 @@ public class FeeController {
     public double getDeliveryFee(String location, String vehicle){
 
         WeatherInput station = getStationData(location);
-        if (Objects.equals(station.getStation_name(), "No Such station"))
+        if (Objects.equals(station.getStation_name(), "No Such station") && !Objects.equals(location, ""))
             return -1.0;//If this station wasn't in the database
 
         double fee = calculateRegionalBaseFee(location,vehicle);
@@ -99,26 +98,28 @@ public class FeeController {
     }
     public double calculateRegionalBaseFee(String location, String vehicle){
 
-        if (location.equals("Tallinn-Harku")) {
-            if (vehicle.equals("Car")) return 4.0;
-            if (vehicle.equals("Scooter")) return 3.5;
-            if (vehicle.equals("Bike")) return 3.0;
-        }
-        else if (location.equals("Tartu-Tõravere")){
-            if (vehicle.equals("Car")) return 3.5;
-            if (vehicle.equals("Scooter")) return 3.0;
-            if (vehicle.equals("Bike")) return 2.5;
-        }
-        else if (location.equals("Pärnu")){
-            if (vehicle.equals("Car")) return 3.0;
-            if (vehicle.equals("Scooter")) return 2.5;
-            if (vehicle.equals("Bike")) return 2.0;
+        switch (location) {
+            case "Tallinn-Harku" -> {
+                if (vehicle.equals("Car")) return 4.0;
+                if (vehicle.equals("Scooter")) return 3.5;
+                if (vehicle.equals("Bike")) return 3.0;
+            }
+            case "Tartu-Tõravere" -> {
+                if (vehicle.equals("Car")) return 3.5;
+                if (vehicle.equals("Scooter")) return 3.0;
+                if (vehicle.equals("Bike")) return 2.5;
+            }
+            case "Pärnu" -> {
+                if (vehicle.equals("Car")) return 3.0;
+                if (vehicle.equals("Scooter")) return 2.5;
+                if (vehicle.equals("Bike")) return 2.0;
+            }
         }
         return -200.0;//if none of the options apply
     }
 
     public static WeatherInput getStationData(String stationName){
         return repo.findById(stationName)
-                .orElse(new WeatherInput("No Such station",null,null,null,null,null));//using such a string as a station name so, that I could find out if station exists later on.
+                .orElse(new WeatherInput("No Such station",null,null,null,"Hail",null));//using such a string as a station name so, that I could find out if station exists later on.
     }
 }

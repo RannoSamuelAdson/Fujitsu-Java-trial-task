@@ -1,6 +1,6 @@
 package com.example.Courier.service;
 
-import com.example.Courier.CourierApplication;
+
 import com.example.Courier.model.WeatherInput;
 import com.example.Courier.repository.WeatherRepo;
 import org.springframework.beans.factory.annotation.Autowired;
