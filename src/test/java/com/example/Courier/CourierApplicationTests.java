@@ -230,8 +230,42 @@ import static org.mockito.Mockito.*;
 	2. (location = "Pärnu", vehicle = Bike, weatherPhenomenon = Hail): return -2
 	3. (location = "Pärnu", vehicle = car): return 3
 	 */
+	@Test
+	void testgetDeliveryFee_Pärnu_Scooter_CityNotFound() {
+		// Arrange
+		when(weatherRepoMock.findById("Pärnu")).thenReturn(Optional.empty());
 
+		// Act
+		double fee = controller.getDeliveryFee("Pärnu","Scooter");
 
+		// Assert
+		assertEquals(-1, fee);
+	}
+
+	@Test
+	void testgetDeliveryFee_Pärnu_Bike_phenomenonHail() {
+		// Arrange
+		WeatherInput weatherInput = new WeatherInput("Pärnu", 41803,5.0f,3.0f,"Hail",new Timestamp(System.currentTimeMillis()));
+		when(weatherRepoMock.findById("Pärnu")).thenReturn(Optional.of(weatherInput));
+
+		// Act
+		double fee = controller.getDeliveryFee("Pärnu","Bike");
+
+		// Assert
+		assertEquals(-2, fee);
+	}
+	@Test
+	void testgetDeliveryFee_Pärnu_Car() {
+		// Arrange
+		WeatherInput weatherInput = new WeatherInput("Pärnu", 41803,5.0f,3.0f,"Hail",new Timestamp(System.currentTimeMillis()));
+		when(weatherRepoMock.findById("Pärnu")).thenReturn(Optional.of(weatherInput));
+
+		// Act
+		double fee = controller.getDeliveryFee("Pärnu","Car");
+
+		// Assert
+		assertEquals(3, fee);
+	}
 
 	//getFeeRequestResponse(String location, String vehicle)
 	/*
