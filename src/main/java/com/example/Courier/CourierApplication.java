@@ -15,7 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class CourierApplication {
 	public static WeatherRepo repo;
-	public static void main(String[] args) {
+	public static void main(String[] args) {//Main function, run it to activate the application
 		ConfigurableApplicationContext context = SpringApplication.run(CourierApplication.class, args);
 		repo = context.getBean(WeatherRepo.class);//get a database to work with
 		CronJobService.updateDatabase(repo, "https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php");//insert values into database

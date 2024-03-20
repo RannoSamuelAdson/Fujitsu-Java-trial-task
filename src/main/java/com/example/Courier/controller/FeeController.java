@@ -35,10 +35,10 @@ public class FeeController {
             return -2.0;//if weather is hazardous for this vehicle
 
         fee += extraFees;
-        return fee;
+        return fee;//if XML webpage malfunction(then about -200) or standard output
     }
     public double calculateExtraFees(WeatherInput station, String vehicle){
-        double extraFees = 0.0;
+        double extraFees = 0.0; //starts adding to it, depending on conditions
 
         int weatherSeverity = determineWeatherSeverity(station.getPhenomenon());
 
@@ -53,6 +53,7 @@ public class FeeController {
 
 
             //Checking for weather phenomenons, such as rain or snow
+
             if (weatherSeverity == 1); //since having no difficult weather phenomenon is the norm in Estonia,
                 // It would be wasteful to check for all other situations each time this is the case
 
@@ -81,11 +82,8 @@ public class FeeController {
     }
 
     public int determineWeatherSeverity(String phenomenon){
-        //returns:
-        //In case the weather phenomenon is glaze, hail, thunder, or thunderstorm returns 4
-        //If weather phenomenon is related to snow or sleet, returns 3
-        //If weather phenomenon is related to rain, returns 2
-        //If weather is none of the above, returns 1
+        // returns numbers 4-1. The larger the number, the more hazardous the weather.
+        // The hazard level is classified by the extra fee phenomenon requirements
         if (phenomenon.equals("Glaze") || phenomenon.equals("Hail") || phenomenon.equals("Thunder") || phenomenon.equals("Thunderstorm"))
             return 4;
         if (phenomenon.contains("snow") || phenomenon.contains("sleet"))
@@ -115,11 +113,11 @@ public class FeeController {
                 if (vehicle.equals("Bike")) return 2.0;
             }
         }
-        return -200.0;//if none of the options apply
+        return -200.0;//if none of the options apply, therefore location or vehicle hasn't been picked in the interface
     }
 
-    public static WeatherInput getStationData(String stationName){
-        return repo.findById(stationName)
+    public static WeatherInput getStationData(String location){
+        return repo.findById(location)
                 .orElse(new WeatherInput("No Such station",null,null,null,"Hail",null));//using such a string as a station name so, that I could find out if station exists later on.
     }
 }

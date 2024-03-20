@@ -24,7 +24,7 @@ public class CronJobService {
 
     private final WeatherRepo weatherRepo;
 
-    @Autowired
+    @Autowired //standard constructor
     public CronJobService(WeatherRepo weatherRepo) {
         this.weatherRepo = weatherRepo;
     }
@@ -44,7 +44,7 @@ public class CronJobService {
             try (InputStream inputStream = connection.getInputStream()) {
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();//Making parser to read XML
                 DocumentBuilder builder = factory.newDocumentBuilder();
-                Document document = builder.parse(inputStream);//parsing XML
+                Document document = builder.parse(inputStream);//parsing XML, to get it readable for code
 
                 NodeList stationNodes = document.getElementsByTagName("station");//separating data by different stations
                 if (stationNodes.getLength() > 0){//if the web page contained weather information
@@ -56,7 +56,7 @@ public class CronJobService {
                 Date date = new Date(unixTimestamp * 1000L);  // Convert to milliseconds
                 Timestamp timestamp = new Timestamp(date.getTime());
 
-                for (int i = 0; i < stationNodes.getLength(); i++) {//getting elements from each station
+                for (int i = 0; i < stationNodes.getLength(); i++) {//getting elements from each station to fill the database
 
                     Element stationElement = (Element) stationNodes.item(i);//get element with index i in a station
                     String name = getTextContent(stationElement, "name");

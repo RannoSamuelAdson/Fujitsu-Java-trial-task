@@ -43,19 +43,19 @@ import static org.mockito.Mockito.*;
 
 	//CalculateRegionalBaseFee(String location, String vehicle) tests
 	/*
-	1. (location = Tallinn-Harku , vehicle = Car) => return 4
-	2. (location = Tallinn-Harku, vehicle = Scooter) => return 3.5
-	3. (location = Tallinn-Harku, vehicle = Bike) => return 3
-	4. (location = Tartu-Tõravere, vehicle = Car) => return 3.5
-	5. (location = Tartu-Tõravere, vehicle = Scooter) => return 3
-	6. (location = Tartu-Tõravere, vehicle = Bike) => return 2.5
-	7. (location = Pärnu, vehicle = Car) => return 3
-	8. (location = Pärnu, vehicle = Scooter) => return 2.5
-	9. (location = Pärnu, vehicle = Bike) => return 2
-	10. (location = Tallinn-Harku , vehicle = "") => return -200
-	11. (location = Tartu-Tõravere, vehicle = "") => return -200
-	12. (location = Pärnu, vehicle = "") => return -200
-	13. (location = "", vehicle = "") => return -200
+	1. (location = Tallinn-Harku , vehicle = Car): return 4
+	2. (location = Tallinn-Harku, vehicle = Scooter): return 3.5
+	3. (location = Tallinn-Harku, vehicle = Bike): return 3
+	4. (location = Tartu-Tõravere, vehicle = Car): return 3.5
+	5. (location = Tartu-Tõravere, vehicle = Scooter): return 3
+	6. (location = Tartu-Tõravere, vehicle = Bike): return 2.5
+	7. (location = Pärnu, vehicle = Car): return 3
+	8. (location = Pärnu, vehicle = Scooter): return 2.5
+	9. (location = Pärnu, vehicle = Bike): return 2
+	10. (location = Tallinn-Harku , vehicle = ""): return -200
+	11. (location = Tartu-Tõravere, vehicle = ""): return -200
+	12. (location = Pärnu, vehicle = ""): return -200
+	13. (location = "", vehicle = ""): return -200
 	* */
 		@Test
 		void testCalculateRegionalBaseFee_TallinnHarku_Car () {
@@ -125,10 +125,10 @@ import static org.mockito.Mockito.*;
 
 		/*
 	//determineWeatherSeverity(String phenomenon)
-	1. (phenomenon = Hail) => return 4
-	2. (phenomenon = Moderate snow shower) => return 3
-	3. (phenomenon = Light rain) => return 2
-	4. (phenomenon = "") => return 1
+	1. (phenomenon = Hail): return 4
+	2. (phenomenon = Moderate snow shower): return 3
+	3. (phenomenon = Light rain): return 2
+	4. (phenomenon = ""): return 1
 	 */
 		@Test
 		void testdetermineWeatherSeverity_Hail() {
@@ -162,7 +162,7 @@ import static org.mockito.Mockito.*;
 	}
 	@Test
 	void testcalculateExtraFees_Bike_tempMinus20_phenomenonSnow_WindSpeed25() {
-		WeatherInput station = new WeatherInput("Pärnu",41803,-5.0f,25.0f,"Moderate snow shower",new Timestamp(System.currentTimeMillis()));
+		WeatherInput station = new WeatherInput("Pärnu",41803,-20.0f,25.0f,"Moderate snow shower",new Timestamp(System.currentTimeMillis()));
 
 		assertEquals(-1, controller.calculateExtraFees(station,"Bike"));
 	}
