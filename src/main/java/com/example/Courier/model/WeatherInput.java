@@ -20,9 +20,7 @@ public class WeatherInput {
     private Timestamp time_stamp;
 
 
-    public static boolean doesStationExist(WeatherInput station){
-        return (!Objects.equals(station.getStation_name(), "No Such station"));
-    }
+
     public String getStation_name() {
         return station_name;
     } //getters for needed values

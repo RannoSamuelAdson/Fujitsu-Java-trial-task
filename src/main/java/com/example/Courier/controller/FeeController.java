@@ -28,7 +28,7 @@ public class FeeController {
 
         WeatherInput station = getStationData(location);
         if (Objects.equals(station.getStation_name(), "No Such station"))
-            return -3.0;//If this station wasn't in the database
+            return -1.0;//If this station wasn't in the database
 
         double fee = calculateRegionalBaseFee(location,vehicle);
         double extraFees = calculateExtraFees(station,vehicle);
@@ -61,7 +61,7 @@ public class FeeController {
                 extraFees += 0.5;
             else if (weatherSeverity == 3)//snow or sleet
                 extraFees += 1.0;
-            else if (weatherSeverity == 4) //hazardous weather conditions
+            else //hazardous weather conditions
                 return -1;//Send out a negative value, that "getFeeRequestResponse()" function would notice it
 
 
@@ -104,12 +104,12 @@ public class FeeController {
             if (vehicle.equals("Scooter")) return 3.5;
             if (vehicle.equals("Bike")) return 3.0;
         }
-        if (location.equals("Tartu-Tõravere")){
+        else if (location.equals("Tartu-Tõravere")){
             if (vehicle.equals("Car")) return 3.5;
             if (vehicle.equals("Scooter")) return 3.0;
             if (vehicle.equals("Bike")) return 2.5;
         }
-        if (location.equals("Pärnu")){
+        else if (location.equals("Pärnu")){
             if (vehicle.equals("Car")) return 3.0;
             if (vehicle.equals("Scooter")) return 2.5;
             if (vehicle.equals("Bike")) return 2.0;
