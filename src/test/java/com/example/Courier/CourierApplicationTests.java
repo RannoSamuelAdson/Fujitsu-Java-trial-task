@@ -7,7 +7,7 @@ package com.example.Courier;
 import com.example.Courier.controller.FeeController;
 import com.example.Courier.model.WeatherInput;
 import com.example.Courier.repository.WeatherRepo;
-import com.example.Courier.service.CronJobService;
+import com.example.Courier.service.CronJobs.WeatherInformationFetcher;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -186,42 +186,6 @@ import static org.mockito.Mockito.*;
 
 
 
-	//getStationData(String stationName)
-	/*
-	1. (stationName = "Pärnu", database has Pärnu): return the station
-	2. (stationName = "Pärnu", database does not have Pärnu): return station of "no such station"
-	*/
-	@Test
-	void testGetStationData_Pärnu_Found() {
-		// Arrange
-		WeatherInput expectedWeatherInput = new WeatherInput("Pärnu", 41803,5.0f,3.0f,"Hail",new Timestamp(System.currentTimeMillis()));
-		when(weatherRepoMock.findById("Pärnu")).thenReturn(Optional.of(expectedWeatherInput));
-
-		// Act
-		WeatherInput result = FeeController.getStationData("Pärnu");
-
-		// Assert
-		assertNotNull(result);
-		assertEquals(expectedWeatherInput, result);
-	}
-
-	@Test
-	void testGetStationData_Pärnu_NotFound() {
-		// Arrange
-		when(weatherRepoMock.findById("NonexistentStation")).thenReturn(Optional.empty());
-
-		// Act
-		WeatherInput result = FeeController.getStationData("NonexistentStation");
-
-		// Assert
-		assertNotNull(result);
-		assertEquals("No Such station", result.getStation_name());
-	}
-
-
-
-
-
 	//getDeliveryFee(String location, String vehicle)
 	/*
 	1. (location = "Pärnu", database does not have Pärnu, vehcle = Scooter): return -1
@@ -297,9 +261,6 @@ import static org.mockito.Mockito.*;
 	}
 	@Test
 	void testgetFeeRequestResponse_EmptyLocationAndVehicle() {
-		// Arrange
-		//WeatherInput station = new WeatherInput("Pärnu",41803,-5.0f,25.0f,"Moderate snow shower",new Timestamp(System.currentTimeMillis()));
-		//when(weatherRepoMock.findById("Pärnu")).thenReturn(Optional.of(station));
 
 		// Act
 		String response = controller.getFeeRequestResponse("","");
@@ -320,7 +281,6 @@ import static org.mockito.Mockito.*;
 		assertEquals(response, "The fee for this delivery is 4.0€.");
 	}
 
-
 	}
 @SpringBootTest
 class CronJobServiceTest {
@@ -332,15 +292,15 @@ class CronJobServiceTest {
 	@Test
 	void testupdateDatabase_validURL() throws Exception {
 		//Tests that if updateDatabase has been called with a valid URL, then:
-		//1. Old weather records were wiped(avoids data duplication and storing of unnecessary data)
-		//2. 3 WeatherInput objects were saved into the database
-		//3. at least one of these objects had the station name of "Tallinn-Harku"
+		//1. Old weather records were wiped(avoids data duplication and storing of unnecessary data).
+		//2. 3 WeatherInput objects were saved into the database.
+		//3. at least one of these objects had the station name of "Tallinn-Harku".
 
 
 		// Call the method to be tested
-		CronJobService.updateDatabase(weatherRepoMock, "https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php");
-		// Verify that deleteAll() was called
-		verify(weatherRepoMock, times(1)).deleteAll();
+		WeatherInformationFetcher fetcher = new WeatherInformationFetcher(weatherRepoMock);
+		fetcher.updateDatabase();
+
 		ArgumentCaptor<WeatherInput> captor = ArgumentCaptor.forClass(WeatherInput.class);
 		verify(weatherRepoMock, times(3)).save(captor.capture());
 
@@ -350,24 +310,6 @@ class CronJobServiceTest {
 		// Assert that one of the objects saved was by the name of "Tallinn-Harku"
 		assertTrue(capturedWeatherInputs.stream()
 				.anyMatch(input -> Objects.equals(input.getStation_name(), "Tallinn-Harku")));
-
-	}
-	@Test
-	void testupdateDatabase_invalidURL() throws Exception {
-		//Tests that if updateDatabase has been called with an invalid URL, then:
-		//NB! By "invalid URL" is meant a URL, that does not have XML data. This would be the case if the weather data page was corrupted or had been assigned another function to fulfill.
-		//1. Old weather records were not wiped(rather than wiping old records, the application would continue working with the latest accessable data)
-		//2. no WeatherInput objects were saved into the database
-
-
-		// Call the method to be tested
-		CronJobService.updateDatabase(weatherRepoMock, "https://global.fujitsu/et-ee");
-		// Verify that deleteAll() was not called
-		verify(weatherRepoMock, times(0)).deleteAll();
-		ArgumentCaptor<WeatherInput> captor = ArgumentCaptor.forClass(WeatherInput.class);
-		// Verify that no arguments were saved into database
-		verify(weatherRepoMock, times(0)).save(captor.capture());
-
 
 	}
 

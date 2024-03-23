@@ -1,4 +1,4 @@
-package com.example.Courier.service;
+package com.example.Courier.service.CronJobs;
 
 
 import com.example.Courier.model.WeatherInput;
@@ -20,24 +20,23 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 @Service
-public class CronJobService {
+public class WeatherInformationFetcher {
 
     private final WeatherRepo weatherRepo;
 
     @Autowired //standard constructor
-    public CronJobService(WeatherRepo weatherRepo) {
+    public WeatherInformationFetcher(WeatherRepo weatherRepo) {
         this.weatherRepo = weatherRepo;
     }
 
-    @Scheduled(cron = "0 15 * * * *") // Run every hour, 15 minutes and 0 seconds into that hour
-    public void updateWeatherData() {
-        updateDatabase(weatherRepo, "https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php");
-    }
 
-    public static void updateDatabase(WeatherRepo repo, String urlString){
+    public void updateWeatherData() {
+        updateDatabase();
+    }
+    @Scheduled(cron = "0 15 * * * *") // Run every hour, 15 minutes and 0 seconds into that hour
+    public void updateDatabase(){
         try {
-            System.out.println("Updating database");
-            URL url = new URL(urlString);
+            URL url = new URL("https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
 
@@ -48,7 +47,7 @@ public class CronJobService {
 
                 NodeList stationNodes = document.getElementsByTagName("station");//separating data by different stations
                 if (stationNodes.getLength() > 0){//if the web page contained weather information
-                    repo.deleteAll();//wipe old records
+                    this.weatherRepo.deleteAll();//wipe old records
                 }
                 //getting timestamp
                 String timestampValue = document.getDocumentElement().getAttribute("timestamp");
@@ -70,7 +69,7 @@ public class CronJobService {
                         Float windSpeed = getFloatContent(stationElement, "windspeed");
                         String phenomenon = getTextContent(stationElement, "phenomenon");
 
-                        repo.save(new WeatherInput(name,wmocode,airTemperature,windSpeed,phenomenon,timestamp));//inputting to a database
+                        this.weatherRepo.save(new WeatherInput(name,wmocode,airTemperature,windSpeed,phenomenon,timestamp));//inputting to a database
                         }
 
                 }

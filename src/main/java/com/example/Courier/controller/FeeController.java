@@ -116,7 +116,7 @@ public class FeeController {
         return -200.0;//if none of the options apply, therefore location or vehicle hasn't been picked in the interface
     }
 
-    public static WeatherInput getStationData(String location){
+    private static WeatherInput getStationData(String location){
         return repo.findById(location)
                 .orElse(new WeatherInput("No Such station",null,null,null,"Hail",null));//using such a string as a station name so, that I could find out if station exists later on.
     }

@@ -2,7 +2,7 @@ package com.example.Courier;
 
 
 import com.example.Courier.repository.WeatherRepo;
-import com.example.Courier.service.CronJobService;
+import com.example.Courier.service.CronJobs.WeatherInformationFetcher;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,7 +18,8 @@ public class CourierApplication {
 	public static void main(String[] args) {//Main function, run it to activate the application
 		ConfigurableApplicationContext context = SpringApplication.run(CourierApplication.class, args);
 		repo = context.getBean(WeatherRepo.class);//get a database to work with
-		CronJobService.updateDatabase(repo, "https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php");//insert values into database
+		WeatherInformationFetcher weatherInformationFetcher = new WeatherInformationFetcher(repo);
+		weatherInformationFetcher.updateDatabase();//insert values into database
 
 
 	}
