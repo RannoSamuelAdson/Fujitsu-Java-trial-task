@@ -245,7 +245,7 @@ import static org.mockito.Mockito.*;
 		String response = controller.getFeeRequestResponse("Pärnu","Car");
 
 		// Assert
-		assertEquals(response, "There was an issue with loading weather data. Check your internet connection.");
+		assertEquals(response, "There was an issue with loading weather data. Try again later.");
 	}
 	@Test
 	void testgetFeeRequestResponse_Pärnu_Bike_WindSpeed25() {

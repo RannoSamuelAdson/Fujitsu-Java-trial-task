@@ -23,27 +23,27 @@ public class WeatherInput {
 
     public String getStation_name() {
         return station_name;
-    } //standard getter
+    } // Standard getter.
 
 
     public Float getAir_temp() {
         return air_temp;
-    } //standard getter
+    } // Standard getter.
 
     public Float getWindSpeed() {
         return wind_speed;
-    } //standard getter
+    } // Standard getter.
 
     public String getPhenomenon() {
         return phenomenon;
-    } //standard getter
+    } // Standard getter.
 
 
     public WeatherInput() {
-        // Default constructor required by Hibernate
+        // Default constructor required by Hibernate.
     }
 
-    public WeatherInput(String station_name, Integer WMO, Float air_temp, Float wind_speed, String phenomenon, Timestamp time_stamp) { //standard constructor
+    public WeatherInput(String station_name, Integer WMO, Float air_temp, Float wind_speed, String phenomenon, Timestamp time_stamp) { // Standard constructor.
         this.station_name = station_name;
         this.WMO = WMO;
         this.air_temp = air_temp;
@@ -51,6 +51,5 @@ public class WeatherInput {
         this.phenomenon = phenomenon;
         this.time_stamp = time_stamp;
     }
-
 
 }

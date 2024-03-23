@@ -29,10 +29,6 @@ public class WeatherInformationFetcher {
         this.weatherRepo = weatherRepo;
     }
 
-
-    public void updateWeatherData() {
-        updateDatabase();
-    }
     @Scheduled(cron = "0 15 * * * *") // Run every hour, 15 minutes and 0 seconds into that hour
     public void updateDatabase(){
         try {
@@ -41,35 +37,35 @@ public class WeatherInformationFetcher {
             connection.setRequestMethod("GET");
 
             try (InputStream inputStream = connection.getInputStream()) {
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();//Making parser to read XML
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();// Making parser to read XML.
                 DocumentBuilder builder = factory.newDocumentBuilder();
-                Document document = builder.parse(inputStream);//parsing XML, to get it readable for code
+                Document document = builder.parse(inputStream);// Parsing XML to get it readable for code.
 
-                NodeList stationNodes = document.getElementsByTagName("station");//separating data by different stations
-                if (stationNodes.getLength() > 0){//if the web page contained weather information
-                    this.weatherRepo.deleteAll();//wipe old records
+                NodeList stationNodes = document.getElementsByTagName("station");// Separating data by different stations.
+                if (stationNodes.getLength() > 0){// If the web page contained weather information.
+                    this.weatherRepo.deleteAll();// Wipe old records.
                 }
                 //getting timestamp
                 String timestampValue = document.getDocumentElement().getAttribute("timestamp");
                 long unixTimestamp = Long.parseLong(timestampValue);
-                Date date = new Date(unixTimestamp * 1000L);  // Convert to milliseconds
+                Date date = new Date(unixTimestamp * 1000L);  // Convert to milliseconds.
                 Timestamp timestamp = new Timestamp(date.getTime());
 
-                for (int i = 0; i < stationNodes.getLength(); i++) {//getting elements from each station to fill the database
+                for (int i = 0; i < stationNodes.getLength(); i++) {// Getting elements from each station to fill the database.
 
-                    Element stationElement = (Element) stationNodes.item(i);//get element with index i in a station
+                    Element stationElement = (Element) stationNodes.item(i);// Get element with index i in a station.
                     String name = getTextContent(stationElement, "name");
 
-                    if (name.equals("Tallinn-Harku") || name.equals("Tartu-Tõravere") || name.equals("Pärnu")){//Saves into the database only if stations can be used by the app
-                        //this saves database space and makes the process of saving faster overall
+                    if (name.equals("Tallinn-Harku") || name.equals("Tartu-Tõravere") || name.equals("Pärnu")){// Saves into the database only if stations can be used by the app.
+                        // This saves database space and makes the process of saving faster overall.
 
 
-                        Integer wmocode = getIntegerContent(stationElement, "wmocode");//getting other variables
+                        Integer wmocode = getIntegerContent(stationElement, "wmocode");// Getting other variables.
                         Float airTemperature = getFloatContent(stationElement, "airtemperature");
                         Float windSpeed = getFloatContent(stationElement, "windspeed");
                         String phenomenon = getTextContent(stationElement, "phenomenon");
 
-                        this.weatherRepo.save(new WeatherInput(name,wmocode,airTemperature,windSpeed,phenomenon,timestamp));//inputting to a database
+                        this.weatherRepo.save(new WeatherInput(name,wmocode,airTemperature,windSpeed,phenomenon,timestamp));// Inputting to a database.
                         }
 
                 }
