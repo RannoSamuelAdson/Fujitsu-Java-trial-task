@@ -3,14 +3,10 @@ package com.example.Courier.controller;
 
 
 import com.example.Courier.model.WeatherInput;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import java.util.Objects;
-
 import static com.example.Courier.CourierApplication.repository;
 
 @RestController
@@ -23,18 +19,18 @@ public class DeliveryFeeController {
         this.environment = environment;
     }
 
-
-
     public double getDeliveryFee(String location, String vehicle){
 
         WeatherInput station = getStationData(location);
         if (Objects.equals(station, null) && !Objects.equals(location, ""))
-            return -1.0;// If this station wasn't in the database.
+            return -1.0;// If this station wasn't in the database, but a valid station was entered.
 
         double fee = calculateRegionalBaseFee(location,vehicle);
         double extraFees = 0;
+
         if (fee != -200)
             extraFees = calculateExtraFees(station,vehicle);
+
         if (extraFees == -1)
             return -2.0;// If weather is hazardous for this vehicle.
 
@@ -55,19 +51,19 @@ public class DeliveryFeeController {
             if (station.getAirTemperature() < -10)
                 extraFees += 1.0;
 
-
             //Checking for weather phenomenons, such as rain or snow.
 
             if (weatherSeverity == 1); // Since having no difficult weather phenomenon is the norm in Estonia,
                 // it would be wasteful to check for all other situations each time this is the case.
 
-            else if (weatherSeverity == 2)// If raining,
+            if (weatherSeverity == 2)// If raining,
                 extraFees += 0.5;
-            else if (weatherSeverity == 3)// If snow or sleet.
-                extraFees += 1.0;
-            else // If hazardous weather conditions.
-                return -1;// Send out a negative value, that "getFeeRequestResponse()" function would notice it.
 
+            if (weatherSeverity == 3)// If snow or sleet.
+                extraFees += 1.0;
+
+            if (weatherSeverity == 4) // If hazardous weather conditions.
+                return -1;// Send out a negative value, that "getFeeRequestResponse()" function would notice it.
 
         }
         if (vehicle.equals("Bike")){
@@ -88,14 +84,17 @@ public class DeliveryFeeController {
     public int determineWeatherSeverity(String phenomenon){
         // Returns numbers 4-1. The larger the number, the more hazardous the weather.
         // The hazard level is classified by the extra fee phenomenon requirements.
+
         if (phenomenon.equals("Glaze") || phenomenon.equals("Hail") || phenomenon.equals("Thunder") || phenomenon.equals("Thunderstorm"))
             return 4;
-        if (phenomenon.contains("snow") || phenomenon.contains("sleet"))
-            return 3; //all possible values related to snow or sleet have these words in them
-        if (phenomenon.contains("rain")||phenomenon.contains("shower"))
-            return 2; //all possible values related to rain have these words in them
 
-        return 1;//if none of the above
+        if (phenomenon.contains("snow") || phenomenon.contains("sleet"))
+            return 3; // All possible values related to snow or sleet have these words in them.
+
+        if (phenomenon.contains("rain")||phenomenon.contains("shower"))
+            return 2; // All possible values related to rain have these words in them.
+
+        return 1;// If none of the above.
 
     }
     public double calculateRegionalBaseFee(String location, String vehicle) {
@@ -104,23 +103,24 @@ public class DeliveryFeeController {
 
         if (feeValue != null) {
             return Double.parseDouble(feeValue);
-        } else {
-            return -200.0; // If none of the options apply
         }
+        return -200.0; // If none of the options apply.
+
     }
 
     private static WeatherInput getStationData(String location) {
         long repositorySize = repository.count();
 
+        for (long i = 0; i < 3; i++) { // Getting the last 3 elements, for they will be the most recent elements of the repository.
 
-
-        for (long i = 0; i < 3; i++) {
             Integer weatherInputIndex = Math.toIntExact(repositorySize - i);
             WeatherInput weatherInput = repository.findById(weatherInputIndex).orElse(null);
+
             if (weatherInput != null && (Objects.equals(weatherInput.getStationName(), location)))
                 return weatherInput;
         }
-        return null;
+        return null; // Case, where an element was requested, that wasn't in the database.
+        // Refers to either HttpStatus.BAD_REQUEST or HttpStatus.INTERNAL_SERVER_ERROR.
     }
 
 }

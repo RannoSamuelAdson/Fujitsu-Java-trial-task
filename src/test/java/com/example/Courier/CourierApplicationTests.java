@@ -67,6 +67,7 @@ import static org.mockito.Mockito.*;
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
 		assertEquals("There was an issue with loading weather data. Try again later.", responseEntity.getBody());
 	}
+
 	@Test
 	void testgetFeeRequestResponse_Pärnu_Bike_WindSpeed25() {
 		// Arrange
@@ -83,6 +84,7 @@ import static org.mockito.Mockito.*;
 		assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
 		assertEquals("Usage of selected vehicle type is forbidden",responseEntity.getBody());
 	}
+
 	@Test
 	void testgetFeeRequestResponse_EmptyLocationAndVehicle() {
 
@@ -93,6 +95,7 @@ import static org.mockito.Mockito.*;
 		assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
 		assertEquals("Enter city name and vehicle before submitting.",responseEntity.getBody());
 	}
+
 	@Test
 	void testgetFeeRequestResponse_Tallinn_Car() {
 		// Arrange
@@ -113,38 +116,38 @@ import static org.mockito.Mockito.*;
 }
 
 @SpringBootTest
-	class DeliveryFeeControllerTest {
+class DeliveryFeeControllerTest {
 
-		@Autowired
-		private DeliveryFeeController deliveryFeeController;
+	@Autowired
+	private DeliveryFeeController deliveryFeeController;
 
-		@Mock
-		private WeatherRepository weatherRepositoryMock;
-		@Mock
-		private Environment environment;
+	@Mock
+	private WeatherRepository weatherRepositoryMock;
 
-		@BeforeEach
-		void setUp() {
-			MockitoAnnotations.openMocks(this);
-			CourierApplication.repository = weatherRepositoryMock;
-			deliveryFeeController = new DeliveryFeeController(environment);
-		}
+	@Mock
+	private Environment environment;
+
+	@BeforeEach
+	void setUp() {
+		MockitoAnnotations.openMocks(this);
+		CourierApplication.repository = weatherRepositoryMock;
+		deliveryFeeController = new DeliveryFeeController(environment);
+	}
 
 	//CalculateRegionalBaseFee(String location, String vehicle) tests
 	/*
 	1. (location = Tallinn-Harku , vehicle = Car): return 4
 	2. (location = "", vehicle = ""): return -200
 	* */
-		@Test
-		void testCalculateRegionalBaseFee_fee_exists () {
-			when(environment.getProperty("location.fees.Tallinn-Harku.Car")).thenReturn("4.0");
-		assertEquals(4.0, deliveryFeeController.calculateRegionalBaseFee("Tallinn-Harku", "Car"));
+	@Test
+	void testCalculateRegionalBaseFee_fee_exists () {
+		when(environment.getProperty("location.fees.Tallinn-Harku.Car")).thenReturn("4.0");
+	assertEquals(4.0, deliveryFeeController.calculateRegionalBaseFee("Tallinn-Harku", "Car"));
 	}
 
-
-		@Test
-		void testCalculateRegionalBaseFee_no_fee_exists () {
-		assertEquals(-200.0, deliveryFeeController.calculateRegionalBaseFee("", ""));
+	@Test
+	void testCalculateRegionalBaseFee_no_fee_exists () {
+	assertEquals(-200.0, deliveryFeeController.calculateRegionalBaseFee("", ""));
 	}
 
 
@@ -155,22 +158,23 @@ import static org.mockito.Mockito.*;
 	3. (phenomenon = Light rain): return 2
 	4. (phenomenon = ""): return 1
 	 */
-		@Test
-		void testdetermineWeatherSeverity_Hail() {
-			assertEquals(4, deliveryFeeController.determineWeatherSeverity("Hail"));
-		}
-		@Test
-		void testdetermineWeatherSeverity_Moderate_snow_shower() {
-			assertEquals(3, deliveryFeeController.determineWeatherSeverity("Moderate snow shower"));
-		}
-		@Test
-		void testdetermineWeatherSeverity_Light_rain() {
-			assertEquals(2, deliveryFeeController.determineWeatherSeverity("Light rain"));
-		}
-		@Test
-		void testdetermineWeatherSeverity_EmptyString() {
-			assertEquals(1, deliveryFeeController.determineWeatherSeverity(""));
-		}
+	@Test
+	void testdetermineWeatherSeverity_Hail() {
+		assertEquals(4, deliveryFeeController.determineWeatherSeverity("Hail"));
+	}
+
+	@Test
+	void testdetermineWeatherSeverity_Moderate_snow_shower() {
+		assertEquals(3, deliveryFeeController.determineWeatherSeverity("Moderate snow shower"));
+	}
+	@Test
+	void testdetermineWeatherSeverity_Light_rain() {
+		assertEquals(2, deliveryFeeController.determineWeatherSeverity("Light rain"));
+	}
+	@Test
+	void testdetermineWeatherSeverity_EmptyString() {
+		assertEquals(1, deliveryFeeController.determineWeatherSeverity(""));
+	}
 //calculateExtraFees(WeatherInput station, String vehicle)
 	/*
 	1.(vehicle = Bike, station is new Weatherinput(where temp is -5, weatherSeverity is 1, windspeed 15): return 1
@@ -179,6 +183,7 @@ import static org.mockito.Mockito.*;
 	4.(vehicle = Scooter, station is new Weatherinput(where weatherSeverity is 4): return -1
 	5.(vehicle = car, station is a random WeatherInput): return 0
 	*/
+
 	@Test
 	void testcalculateExtraFees_Bike_tempMinus5_phenomenonClear_WindSpeed15() {
 		WeatherInput station = new WeatherInput("Pärnu",41803,-5.0f,15.0f,"Clear",new Timestamp(System.currentTimeMillis()));
@@ -248,6 +253,7 @@ import static org.mockito.Mockito.*;
 		// Assert
 		assertEquals(-2, fee);
 	}
+
 	@Test
 	void testgetDeliveryFee_Pärnu_Car() {
 		// Arrange
@@ -264,8 +270,6 @@ import static org.mockito.Mockito.*;
 		assertEquals(3, fee);
 	}
 
-
-
 	}
 @SpringBootTest
 class CronJobServiceTest {
@@ -273,14 +277,12 @@ class CronJobServiceTest {
 	@Mock
 	private WeatherRepository weatherRepositoryMock;
 
-
 	@Test
 	void testupdateDatabase_validURL() throws Exception {
 		//Tests that if updateDatabase has been called with a valid URL, then:
 		//1. Old weather records were wiped(avoids data duplication and storing of unnecessary data).
 		//2. 3 WeatherInput objects were saved into the database.
 		//3. at least one of these objects had the station name of "Tallinn-Harku".
-
 
 		// Call the method to be tested
 		WeatherInformationFetcher fetcher = new WeatherInformationFetcher(weatherRepositoryMock);

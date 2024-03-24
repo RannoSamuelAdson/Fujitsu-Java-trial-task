@@ -3,13 +3,10 @@ package com.example.Courier;
 
 import com.example.Courier.repository.WeatherRepository;
 import com.example.Courier.service.CronJobs.WeatherInformationFetcher;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-
 import org.springframework.scheduling.annotation.EnableScheduling;
-
 
 @SpringBootApplication
 @EnableScheduling
@@ -21,12 +18,6 @@ public class CourierApplication {
 		WeatherInformationFetcher weatherInformationFetcher = new WeatherInformationFetcher(repository);
 		weatherInformationFetcher.updateDatabase();//insert values into database
 
-
 	}
 
-
-
-
-
 }
-
