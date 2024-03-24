@@ -42,8 +42,8 @@ public class WeatherInformationFetcher {
                 Document document = builder.parse(inputStream);// Parsing XML to get it readable for code.
 
                 NodeList stationNodes = document.getElementsByTagName("station");// Separating data by different stations.
-                //getting timestamp
                 String timestampValue = document.getDocumentElement().getAttribute("timestamp");
+
                 long unixTimestamp = Long.parseLong(timestampValue);
                 Date date = new Date(unixTimestamp * 1000L);  // Convert to milliseconds.
                 Timestamp timestamp = new Timestamp(date.getTime());

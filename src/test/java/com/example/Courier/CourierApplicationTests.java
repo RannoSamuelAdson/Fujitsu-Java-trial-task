@@ -5,6 +5,7 @@ package com.example.Courier;
 
 
 import com.example.Courier.controller.DeliveryFeeController;
+import com.example.Courier.controller.HTTPRequestController;
 import com.example.Courier.model.WeatherInput;
 import com.example.Courier.repository.WeatherRepository;
 import com.example.Courier.service.CronJobs.WeatherInformationFetcher;
@@ -27,12 +28,90 @@ import static com.example.Courier.CourierApplication.repository;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@SpringBootTest
+	class HTTPRequestControllerTest{
+	private HTTPRequestController httpRequestController;
+
+	@Mock
+	private WeatherRepository weatherRepositoryMock;
+
+	@Mock
+	private Environment environment;
+
+	@BeforeEach
+	void setUp() {
+		MockitoAnnotations.openMocks(this);
+		CourierApplication.repository = weatherRepositoryMock;
+		DeliveryFeeController deliveryFeeController = new DeliveryFeeController(environment);
+		httpRequestController = new HTTPRequestController(deliveryFeeController);
+	}
+	//getFeeRequestResponse(String location, String vehicle)
+	/*
+	1. (location = "Pärnu", vehicle = Car, database doesn't have Pärnu): return "There was an issue with loading weather data. Check your internet connection."
+	2. (location = "Pärnu", vehicle = Bike, windspeed = 25): return "Usage of selected vehicle type is forbidden"
+	3. (location = "", vehicle = ""): return "Enter city name and vehicle before submitting."
+	4. (location = "Tallinn-Harku", vehicle = Car): return "The fee for this delivery is 4€."
+	*/
+	@Test
+	void testgetFeeRequestResponse_Pärnu_Car_CityNotFound() {
+		// Arrange
+		// Ensuring that fetching of elements returns correctly.
+		when(repository.count()).thenReturn(0L);
+
+		// Act
+		String response = httpRequestController.getFeeRequestResponse("Pärnu","Car");
+
+		// Assert
+		assertEquals(response, "There was an issue with loading weather data. Try again later.");
+	}
+	@Test
+	void testgetFeeRequestResponse_Pärnu_Bike_WindSpeed25() {
+		// Arrange
+		WeatherInput station = new WeatherInput("Pärnu",41803,-5.0f,25.0f,"Moderate snow shower",new Timestamp(System.currentTimeMillis()));
+		// Ensuring that fetching of elements returns correctly.
+		when(repository.count()).thenReturn(3L);
+		when(repository.findById(3)).thenReturn(Optional.of(station));
+		when(environment.getProperty("location.fees.Pärnu.Bike")).thenReturn("2.0");
+
+		// Act
+		String response = httpRequestController.getFeeRequestResponse("Pärnu","Bike");
+
+		// Assert
+		assertEquals(response, "Usage of selected vehicle type is forbidden");
+	}
+	@Test
+	void testgetFeeRequestResponse_EmptyLocationAndVehicle() {
+
+		// Act
+		String response = httpRequestController.getFeeRequestResponse("","");
+
+		// Assert
+		assertEquals(response, "Enter city name and vehicle before submitting.");
+	}
+	@Test
+	void testgetFeeRequestResponse_Tallinn_Car() {
+		// Arrange
+		WeatherInput station = new WeatherInput("Tallinn-Harku",41803,-5.0f,25.0f,"Moderate snow shower",new Timestamp(System.currentTimeMillis()));
+
+		// Ensuring that fetching of elements returns correctly.
+		when(repository.count()).thenReturn(3L);
+		when(repository.findById(3)).thenReturn(Optional.of(station));
+		when(environment.getProperty("location.fees.Tallinn-Harku.Car")).thenReturn("4.0");
+
+		// Act
+		String response = httpRequestController.getFeeRequestResponse("Tallinn-Harku","Car");
+
+		// Assert
+		assertEquals(response, "The fee for this delivery is 4.0€.");
+	}
+}
 
 @SpringBootTest
 	class DeliveryFeeControllerTest {
 
 		@Autowired
-		private DeliveryFeeController controller;
+		private DeliveryFeeController deliveryFeeController;
+
 		@Mock
 		private WeatherRepository weatherRepositoryMock;
 		@Mock
@@ -42,36 +121,24 @@ import static org.mockito.Mockito.*;
 		void setUp() {
 			MockitoAnnotations.openMocks(this);
 			CourierApplication.repository = weatherRepositoryMock;
-			controller = new DeliveryFeeController(environment);
-
+			deliveryFeeController = new DeliveryFeeController(environment);
 		}
 
 	//CalculateRegionalBaseFee(String location, String vehicle) tests
 	/*
 	1. (location = Tallinn-Harku , vehicle = Car): return 4
-	2. (location = Tallinn-Harku, vehicle = Scooter): return 3.5
-	3. (location = Tallinn-Harku, vehicle = Bike): return 3
-	4. (location = Tartu-Tõravere, vehicle = Car): return 3.5
-	5. (location = Tartu-Tõravere, vehicle = Scooter): return 3
-	6. (location = Tartu-Tõravere, vehicle = Bike): return 2.5
-	7. (location = Pärnu, vehicle = Car): return 3
-	8. (location = Pärnu, vehicle = Scooter): return 2.5
-	9. (location = Pärnu, vehicle = Bike): return 2
-	10. (location = Tallinn-Harku , vehicle = ""): return -200
-	11. (location = Tartu-Tõravere, vehicle = ""): return -200
-	12. (location = Pärnu, vehicle = ""): return -200
-	13. (location = "", vehicle = ""): return -200
+	2. (location = "", vehicle = ""): return -200
 	* */
 		@Test
 		void testCalculateRegionalBaseFee_fee_exists () {
 			when(environment.getProperty("location.fees.Tallinn-Harku.Car")).thenReturn("4.0");
-		assertEquals(4.0, controller.calculateRegionalBaseFee("Tallinn-Harku", "Car"));
+		assertEquals(4.0, deliveryFeeController.calculateRegionalBaseFee("Tallinn-Harku", "Car"));
 	}
 
 
 		@Test
 		void testCalculateRegionalBaseFee_no_fee_exists () {
-		assertEquals(-200.0, controller.calculateRegionalBaseFee("", ""));
+		assertEquals(-200.0, deliveryFeeController.calculateRegionalBaseFee("", ""));
 	}
 
 
@@ -84,19 +151,19 @@ import static org.mockito.Mockito.*;
 	 */
 		@Test
 		void testdetermineWeatherSeverity_Hail() {
-			assertEquals(4, controller.determineWeatherSeverity("Hail"));
+			assertEquals(4, deliveryFeeController.determineWeatherSeverity("Hail"));
 		}
 		@Test
 		void testdetermineWeatherSeverity_Moderate_snow_shower() {
-			assertEquals(3, controller.determineWeatherSeverity("Moderate snow shower"));
+			assertEquals(3, deliveryFeeController.determineWeatherSeverity("Moderate snow shower"));
 		}
 		@Test
 		void testdetermineWeatherSeverity_Light_rain() {
-			assertEquals(2, controller.determineWeatherSeverity("Light rain"));
+			assertEquals(2, deliveryFeeController.determineWeatherSeverity("Light rain"));
 		}
 		@Test
 		void testdetermineWeatherSeverity_EmptyString() {
-			assertEquals(1, controller.determineWeatherSeverity(""));
+			assertEquals(1, deliveryFeeController.determineWeatherSeverity(""));
 		}
 //calculateExtraFees(WeatherInput station, String vehicle)
 	/*
@@ -110,24 +177,24 @@ import static org.mockito.Mockito.*;
 	void testcalculateExtraFees_Bike_tempMinus5_phenomenonClear_WindSpeed15() {
 		WeatherInput station = new WeatherInput("Pärnu",41803,-5.0f,15.0f,"Clear",new Timestamp(System.currentTimeMillis()));
 
-		assertEquals(1, controller.calculateExtraFees(station,"Bike"));
+		assertEquals(1, deliveryFeeController.calculateExtraFees(station,"Bike"));
 	}
 	@Test
 	void testcalculateExtraFees_Bike_tempMinus20_phenomenonSnow_WindSpeed25() {
 		WeatherInput station = new WeatherInput("Pärnu",41803,-20.0f,25.0f,"Moderate snow shower",new Timestamp(System.currentTimeMillis()));
 
-		assertEquals(-1, controller.calculateExtraFees(station,"Bike"));
+		assertEquals(-1, deliveryFeeController.calculateExtraFees(station,"Bike"));
 	}
 	@Test
 	void testcalculateExtraFees_Bike_temp5_phenomenonRain_WindSpeed3() {
 		WeatherInput station = new WeatherInput("Pärnu",41803,5.0f,3.0f,"Light rain",new Timestamp(System.currentTimeMillis()));
 
-		assertEquals(0.5f, controller.calculateExtraFees(station,"Bike"));
+		assertEquals(0.5f, deliveryFeeController.calculateExtraFees(station,"Bike"));
 	}
 	@Test
 	void testcalculateExtraFees_Scooter_phenomenonHail(){
 		WeatherInput station = new WeatherInput("Pärnu",41803,5.0f,3.0f,"Hail",new Timestamp(System.currentTimeMillis()));
-		assertEquals(-1, controller.calculateExtraFees(station,"Scooter"));
+		assertEquals(-1, deliveryFeeController.calculateExtraFees(station,"Scooter"));
 	}
 	/*@Test
 	void testcalculateExtraFees_Car(){
@@ -153,7 +220,7 @@ import static org.mockito.Mockito.*;
 
 
 		// Act
-		double fee = controller.getDeliveryFee("Pärnu","Scooter");
+		double fee = deliveryFeeController.getDeliveryFee("Pärnu","Scooter");
 
 		// Assert
 		assertEquals(-1, fee);
@@ -170,7 +237,7 @@ import static org.mockito.Mockito.*;
 		when(environment.getProperty("location.fees.Pärnu.Bike")).thenReturn("2.0");
 
 		// Act
-		double fee = controller.getDeliveryFee("Pärnu","Bike");
+		double fee = deliveryFeeController.getDeliveryFee("Pärnu","Bike");
 
 		// Assert
 		assertEquals(-2, fee);
@@ -185,71 +252,13 @@ import static org.mockito.Mockito.*;
 		when(environment.getProperty("location.fees.Pärnu.Car")).thenReturn("3.0");
 
 		// Act
-		double fee = controller.getDeliveryFee("Pärnu","Car");
+		double fee = deliveryFeeController.getDeliveryFee("Pärnu","Car");
 
 		// Assert
 		assertEquals(3, fee);
 	}
 
-	//getFeeRequestResponse(String location, String vehicle)
-	/*
-	1. (location = "Pärnu", vehicle = Car, database doesn't have Pärnu): return "There was an issue with loading weather data. Check your internet connection."
-	2. (location = "Pärnu", vehicle = Bike, windspeed = 25): return "Usage of selected vehicle type is forbidden"
-	3. (location = "", vehicle = ""): return "Enter city name and vehicle before submitting."
-	4. (location = "Tallinn-Harku", vehicle = Car): return "The fee for this delivery is 4€."
-	*/
-	@Test
-	void testgetFeeRequestResponse_Pärnu_Car_CityNotFound() {
-		// Arrange
-		// Ensuring that fetching of elements returns correctly.
-		when(repository.count()).thenReturn(0L);
 
-		// Act
-		String response = controller.getFeeRequestResponse("Pärnu","Car");
-
-		// Assert
-		assertEquals(response, "There was an issue with loading weather data. Try again later.");
-	}
-	@Test
-	void testgetFeeRequestResponse_Pärnu_Bike_WindSpeed25() {
-		// Arrange
-		WeatherInput station = new WeatherInput("Pärnu",41803,-5.0f,25.0f,"Moderate snow shower",new Timestamp(System.currentTimeMillis()));
-		// Ensuring that fetching of elements returns correctly.
-		when(repository.count()).thenReturn(3L);
-		when(repository.findById(3)).thenReturn(Optional.of(station));
-		when(environment.getProperty("location.fees.Pärnu.Bike")).thenReturn("2.0");
-
-		// Act
-		String response = controller.getFeeRequestResponse("Pärnu","Bike");
-
-		// Assert
-		assertEquals(response, "Usage of selected vehicle type is forbidden");
-	}
-	@Test
-	void testgetFeeRequestResponse_EmptyLocationAndVehicle() {
-
-		// Act
-		String response = controller.getFeeRequestResponse("","");
-
-		// Assert
-		assertEquals(response, "Enter city name and vehicle before submitting.");
-	}
-	@Test
-	void testgetFeeRequestResponse_Tallinn_Car() {
-		// Arrange
-		WeatherInput station = new WeatherInput("Tallinn-Harku",41803,-5.0f,25.0f,"Moderate snow shower",new Timestamp(System.currentTimeMillis()));
-
-		// Ensuring that fetching of elements returns correctly.
-		when(repository.count()).thenReturn(3L);
-		when(repository.findById(3)).thenReturn(Optional.of(station));
-		when(environment.getProperty("location.fees.Tallinn-Harku.Car")).thenReturn("4.0");
-
-		// Act
-		String response = controller.getFeeRequestResponse("Tallinn-Harku","Car");
-
-		// Assert
-		assertEquals(response, "The fee for this delivery is 4.0€.");
-	}
 
 	}
 @SpringBootTest
