@@ -6,8 +6,8 @@ import com.example.Courier.model.WeatherInput;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.HashSet;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -15,13 +15,21 @@ import static com.example.Courier.CourierApplication.repo;
 
 @RestController
 public class FeeController {
+
+    @Autowired
+    public Environment environment;
+
+    public FeeController(Environment environment) {
+        this.environment = environment;
+    }
+
     @GetMapping("/api/data")
     public String getFeeRequestResponse(@RequestParam String location, String vehicle){
         double fee = getDeliveryFee(location, vehicle);
         if (fee == -1.0 && !location.equals(""))// If no such station in database and city value has been input.
             return "There was an issue with loading weather data. Try again later.";
-        else if (fee == -2) return "Usage of selected vehicle type is forbidden";
-        else if (fee < -2) return "Enter city name and vehicle before submitting.";
+        if (fee == -2) return "Usage of selected vehicle type is forbidden";
+        if (fee < -2) return "Enter city name and vehicle before submitting.";
         return "The fee for this delivery is " + fee + "€.";
     }
 
@@ -52,7 +60,7 @@ public class FeeController {
             if (station.getAir_temp() <= 0 && station.getAir_temp() >= -10)
                 extraFees += 0.5;
 
-            else if (station.getAir_temp() < -10)
+            if (station.getAir_temp() < -10)
                 extraFees += 1.0;
 
 
@@ -76,7 +84,7 @@ public class FeeController {
             if (windspeed >= 10 && windspeed <= 20)
                 return extraFees + 0.5;
 
-            else if (windspeed > 20) {// Hazardous weather conditions.
+            if (windspeed > 20) {// Hazardous weather conditions.
                 return -1;// Send out a negative value, that "getFeeRequestResponse()" function would notice it.
             }
 
@@ -98,31 +106,20 @@ public class FeeController {
         return 1;//if none of the above
 
     }
-    public double calculateRegionalBaseFee(String location, String vehicle){
+    public double calculateRegionalBaseFee(String location, String vehicle) {
+        String propertyName = String.format("location.fees.%s.%s", location, vehicle);
+        String feeValue = environment.getProperty(propertyName);
 
-        switch (location) {
-            case "Tallinn-Harku" -> {
-                if (vehicle.equals("Car")) return 4.0;
-                if (vehicle.equals("Scooter")) return 3.5;
-                if (vehicle.equals("Bike")) return 3.0;
-            }
-            case "Tartu-Tõravere" -> {
-                if (vehicle.equals("Car")) return 3.5;
-                if (vehicle.equals("Scooter")) return 3.0;
-                if (vehicle.equals("Bike")) return 2.5;
-            }
-            case "Pärnu" -> {
-                if (vehicle.equals("Car")) return 3.0;
-                if (vehicle.equals("Scooter")) return 2.5;
-                if (vehicle.equals("Bike")) return 2.0;
-            }
+        if (feeValue != null) {
+            return Double.parseDouble(feeValue);
+        } else {
+            return -200.0; // If none of the options apply
         }
-        return -200.0;//if none of the options apply, therefore location or vehicle hasn't been picked in the interface
     }
 
     private static WeatherInput getStationData(String location) {
         long repositorySize = repo.count();
-        HashSet<WeatherInput> newestWeatherInputs = new HashSet<>();
+
 
 
         for (long i = 0; i < 3; i++) {

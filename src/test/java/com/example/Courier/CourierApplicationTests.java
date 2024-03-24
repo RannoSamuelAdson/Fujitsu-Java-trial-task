@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.env.Environment;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -34,12 +36,15 @@ import static org.mockito.Mockito.*;
 		private FeeController controller;
 		@Mock
 		private WeatherRepo weatherRepoMock;
+		@Mock
+		private Environment environment;
 
 		@BeforeEach
 		void setUp() {
 			MockitoAnnotations.openMocks(this);
 			CourierApplication.repo = weatherRepoMock;
-			controller = new FeeController();
+			controller = new FeeController(environment);
+
 		}
 
 	//CalculateRegionalBaseFee(String location, String vehicle) tests
@@ -59,67 +64,14 @@ import static org.mockito.Mockito.*;
 	13. (location = "", vehicle = ""): return -200
 	* */
 		@Test
-		void testCalculateRegionalBaseFee_TallinnHarku_Car () {
+		void testCalculateRegionalBaseFee_fee_exists () {
+			when(environment.getProperty("location.fees.Tallinn-Harku.Car")).thenReturn("4.0");
 		assertEquals(4.0, controller.calculateRegionalBaseFee("Tallinn-Harku", "Car"));
 	}
 
-		@Test
-		void testCalculateRegionalBaseFee_TallinnHarku_Scooter () {
-		assertEquals(3.5, controller.calculateRegionalBaseFee("Tallinn-Harku", "Scooter"));
-	}
 
 		@Test
-		void testCalculateRegionalBaseFee_TallinnHarku_Bike () {
-		assertEquals(3.0, controller.calculateRegionalBaseFee("Tallinn-Harku", "Bike"));
-	}
-
-		@Test
-		void testCalculateRegionalBaseFee_TartuToravere_Car () {
-		assertEquals(3.5, controller.calculateRegionalBaseFee("Tartu-Tõravere", "Car"));
-	}
-
-		@Test
-		void testCalculateRegionalBaseFee_TartuToravere_Scooter () {
-		assertEquals(3.0, controller.calculateRegionalBaseFee("Tartu-Tõravere", "Scooter"));
-	}
-
-		@Test
-		void testCalculateRegionalBaseFee_TartuToravere_Bike () {
-		assertEquals(2.5, controller.calculateRegionalBaseFee("Tartu-Tõravere", "Bike"));
-	}
-
-		@Test
-		void testCalculateRegionalBaseFee_Parnu_Car () {
-		assertEquals(3.0, controller.calculateRegionalBaseFee("Pärnu", "Car"));
-	}
-
-		@Test
-		void testCalculateRegionalBaseFee_Parnu_Scooter () {
-		assertEquals(2.5, controller.calculateRegionalBaseFee("Pärnu", "Scooter"));
-	}
-
-		@Test
-		void testCalculateRegionalBaseFee_Parnu_Bike () {
-		assertEquals(2.0, controller.calculateRegionalBaseFee("Pärnu", "Bike"));
-	}
-
-		@Test
-		void testCalculateRegionalBaseFee_TallinnHarku_EmptyVehicle () {
-		assertEquals(-200.0, controller.calculateRegionalBaseFee("Tallinn-Harku", ""));
-	}
-
-		@Test
-		void testCalculateRegionalBaseFee_TartuToravere_EmptyVehicle () {
-		assertEquals(-200.0, controller.calculateRegionalBaseFee("Tartu-Tõravere", ""));
-	}
-
-		@Test
-		void testCalculateRegionalBaseFee_Parnu_EmptyVehicle () {
-		assertEquals(-200.0, controller.calculateRegionalBaseFee("Pärnu", ""));
-	}
-
-		@Test
-		void testCalculateRegionalBaseFee_EmptyLocationAndVehicle () {
+		void testCalculateRegionalBaseFee_no_fee_exists () {
 		assertEquals(-200.0, controller.calculateRegionalBaseFee("", ""));
 	}
 
@@ -212,9 +164,11 @@ import static org.mockito.Mockito.*;
 	void testgetDeliveryFee_Pärnu_Bike_phenomenonHail() {
 		// Arrange
 		WeatherInput weatherInput = new WeatherInput("Pärnu", 41803,5.0f,3.0f,"Hail",new Timestamp(System.currentTimeMillis()));
+
 		// Ensuring that fetching of elements returns correctly.
 		when(repo.count()).thenReturn(3L);
 		when(repo.findById(3)).thenReturn(Optional.of(weatherInput));
+		when(environment.getProperty("location.fees.Pärnu.Bike")).thenReturn("2.0");
 
 		// Act
 		double fee = controller.getDeliveryFee("Pärnu","Bike");
@@ -229,6 +183,7 @@ import static org.mockito.Mockito.*;
 		// Ensuring that fetching of elements returns correctly.
 		when(repo.count()).thenReturn(3L);
 		when(repo.findById(3)).thenReturn(Optional.of(weatherInput));
+		when(environment.getProperty("location.fees.Pärnu.Car")).thenReturn("3.0");
 
 		// Act
 		double fee = controller.getDeliveryFee("Pärnu","Car");
@@ -263,6 +218,7 @@ import static org.mockito.Mockito.*;
 		// Ensuring that fetching of elements returns correctly.
 		when(repo.count()).thenReturn(3L);
 		when(repo.findById(3)).thenReturn(Optional.of(station));
+		when(environment.getProperty("location.fees.Pärnu.Bike")).thenReturn("2.0");
 
 		// Act
 		String response = controller.getFeeRequestResponse("Pärnu","Bike");
@@ -287,7 +243,7 @@ import static org.mockito.Mockito.*;
 		// Ensuring that fetching of elements returns correctly.
 		when(repo.count()).thenReturn(3L);
 		when(repo.findById(3)).thenReturn(Optional.of(station));
-
+		when(environment.getProperty("location.fees.Tallinn-Harku.Car")).thenReturn("4.0");
 
 		// Act
 		String response = controller.getFeeRequestResponse("Tallinn-Harku","Car");
