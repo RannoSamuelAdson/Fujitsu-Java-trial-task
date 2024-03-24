@@ -5,5 +5,5 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface WeatherRepo extends CrudRepository<WeatherInput,Integer> { //defines the repository
+public interface WeatherRepository extends CrudRepository<WeatherInput,Integer> { //defines the repository
 }

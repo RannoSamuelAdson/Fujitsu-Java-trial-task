@@ -2,7 +2,7 @@ package com.example.Courier.service.CronJobs;
 
 
 import com.example.Courier.model.WeatherInput;
-import com.example.Courier.repository.WeatherRepo;
+import com.example.Courier.repository.WeatherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -22,11 +22,11 @@ import java.util.Date;
 @Service
 public class WeatherInformationFetcher {
 
-    private final WeatherRepo weatherRepo;
+    private final WeatherRepository weatherRepository;
 
     @Autowired //standard constructor
-    public WeatherInformationFetcher(WeatherRepo weatherRepo) {
-        this.weatherRepo = weatherRepo;
+    public WeatherInformationFetcher(WeatherRepository weatherRepository) {
+        this.weatherRepository = weatherRepository;
     }
 
     @Scheduled(cron = "0 15 * * * *") // Run every hour, 15 minutes and 0 seconds into that hour
@@ -62,7 +62,7 @@ public class WeatherInformationFetcher {
                         Float windSpeed = getFloatContent(stationElement, "windspeed");
                         String phenomenon = getTextContent(stationElement, "phenomenon");
 
-                        this.weatherRepo.save(new WeatherInput(name,wmoCode,airTemperature,windSpeed,phenomenon,timestamp));// Inputting to a database.
+                        this.weatherRepository.save(new WeatherInput(name,wmoCode,airTemperature,windSpeed,phenomenon,timestamp));// Inputting to a database.
                         }
 
                 }

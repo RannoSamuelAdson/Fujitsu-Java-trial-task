@@ -4,9 +4,9 @@ package com.example.Courier;
 
 
 
-import com.example.Courier.controller.FeeController;
+import com.example.Courier.controller.DeliveryFeeController;
 import com.example.Courier.model.WeatherInput;
-import com.example.Courier.repository.WeatherRepo;
+import com.example.Courier.repository.WeatherRepository;
 import com.example.Courier.service.CronJobs.WeatherInformationFetcher;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.env.Environment;
 
 import java.sql.Timestamp;
@@ -24,26 +23,26 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.example.Courier.CourierApplication.repo;
+import static com.example.Courier.CourierApplication.repository;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
 @SpringBootTest
-	class FeeControllerTest {
+	class DeliveryFeeControllerTest {
 
 		@Autowired
-		private FeeController controller;
+		private DeliveryFeeController controller;
 		@Mock
-		private WeatherRepo weatherRepoMock;
+		private WeatherRepository weatherRepositoryMock;
 		@Mock
 		private Environment environment;
 
 		@BeforeEach
 		void setUp() {
 			MockitoAnnotations.openMocks(this);
-			CourierApplication.repo = weatherRepoMock;
-			controller = new FeeController(environment);
+			CourierApplication.repository = weatherRepositoryMock;
+			controller = new DeliveryFeeController(environment);
 
 		}
 
@@ -149,8 +148,8 @@ import static org.mockito.Mockito.*;
 	void testgetDeliveryFee_Pärnu_Scooter_CityNotFound() {
 		// Arrange
 		// Ensuring that fetching of elements returns correctly.
-		when(repo.count()).thenReturn(3L);
-		when(repo.findById(3)).thenReturn(Optional.empty());
+		when(repository.count()).thenReturn(3L);
+		when(repository.findById(3)).thenReturn(Optional.empty());
 
 
 		// Act
@@ -166,8 +165,8 @@ import static org.mockito.Mockito.*;
 		WeatherInput weatherInput = new WeatherInput("Pärnu", 41803,5.0f,3.0f,"Hail",new Timestamp(System.currentTimeMillis()));
 
 		// Ensuring that fetching of elements returns correctly.
-		when(repo.count()).thenReturn(3L);
-		when(repo.findById(3)).thenReturn(Optional.of(weatherInput));
+		when(repository.count()).thenReturn(3L);
+		when(repository.findById(3)).thenReturn(Optional.of(weatherInput));
 		when(environment.getProperty("location.fees.Pärnu.Bike")).thenReturn("2.0");
 
 		// Act
@@ -181,8 +180,8 @@ import static org.mockito.Mockito.*;
 		// Arrange
 		WeatherInput weatherInput = new WeatherInput("Pärnu", 41803,5.0f,3.0f,"Hail",new Timestamp(System.currentTimeMillis()));
 		// Ensuring that fetching of elements returns correctly.
-		when(repo.count()).thenReturn(3L);
-		when(repo.findById(3)).thenReturn(Optional.of(weatherInput));
+		when(repository.count()).thenReturn(3L);
+		when(repository.findById(3)).thenReturn(Optional.of(weatherInput));
 		when(environment.getProperty("location.fees.Pärnu.Car")).thenReturn("3.0");
 
 		// Act
@@ -203,7 +202,7 @@ import static org.mockito.Mockito.*;
 	void testgetFeeRequestResponse_Pärnu_Car_CityNotFound() {
 		// Arrange
 		// Ensuring that fetching of elements returns correctly.
-		when(repo.count()).thenReturn(0L);
+		when(repository.count()).thenReturn(0L);
 
 		// Act
 		String response = controller.getFeeRequestResponse("Pärnu","Car");
@@ -216,8 +215,8 @@ import static org.mockito.Mockito.*;
 		// Arrange
 		WeatherInput station = new WeatherInput("Pärnu",41803,-5.0f,25.0f,"Moderate snow shower",new Timestamp(System.currentTimeMillis()));
 		// Ensuring that fetching of elements returns correctly.
-		when(repo.count()).thenReturn(3L);
-		when(repo.findById(3)).thenReturn(Optional.of(station));
+		when(repository.count()).thenReturn(3L);
+		when(repository.findById(3)).thenReturn(Optional.of(station));
 		when(environment.getProperty("location.fees.Pärnu.Bike")).thenReturn("2.0");
 
 		// Act
@@ -241,8 +240,8 @@ import static org.mockito.Mockito.*;
 		WeatherInput station = new WeatherInput("Tallinn-Harku",41803,-5.0f,25.0f,"Moderate snow shower",new Timestamp(System.currentTimeMillis()));
 
 		// Ensuring that fetching of elements returns correctly.
-		when(repo.count()).thenReturn(3L);
-		when(repo.findById(3)).thenReturn(Optional.of(station));
+		when(repository.count()).thenReturn(3L);
+		when(repository.findById(3)).thenReturn(Optional.of(station));
 		when(environment.getProperty("location.fees.Tallinn-Harku.Car")).thenReturn("4.0");
 
 		// Act
@@ -257,7 +256,7 @@ import static org.mockito.Mockito.*;
 class CronJobServiceTest {
 
 	@Mock
-	private WeatherRepo weatherRepoMock;
+	private WeatherRepository weatherRepositoryMock;
 
 
 	@Test
@@ -269,18 +268,18 @@ class CronJobServiceTest {
 
 
 		// Call the method to be tested
-		WeatherInformationFetcher fetcher = new WeatherInformationFetcher(weatherRepoMock);
+		WeatherInformationFetcher fetcher = new WeatherInformationFetcher(weatherRepositoryMock);
 		fetcher.updateDatabase();
 
 		ArgumentCaptor<WeatherInput> captor = ArgumentCaptor.forClass(WeatherInput.class);
-		verify(weatherRepoMock, times(3)).save(captor.capture());
+		verify(weatherRepositoryMock, times(3)).save(captor.capture());
 
 		// Get the captured WeatherInput objects
 		List<WeatherInput> capturedWeatherInputs = captor.getAllValues();
 
 		// Assert that one of the objects saved was by the name of "Tallinn-Harku"
 		assertTrue(capturedWeatherInputs.stream()
-				.anyMatch(input -> Objects.equals(input.getStation_name(), "Tallinn-Harku")));
+				.anyMatch(input -> Objects.equals(input.getStationName(), "Tallinn-Harku")));
 
 	}
 

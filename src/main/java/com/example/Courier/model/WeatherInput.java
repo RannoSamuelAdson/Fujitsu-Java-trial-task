@@ -6,7 +6,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 import java.sql.Timestamp;
-import java.util.Objects;
 
 @Entity
 public class WeatherInput {
@@ -17,20 +16,20 @@ public class WeatherInput {
 
     private String stationName;
     private Integer WMO;
-    private Float airTemp;
+    private Float airTemperature;
     private Float windSpeed;
     private String phenomenon;
     private Timestamp timestamp;
 
 
 
-    public String getStation_name() {
+    public String getStationName() {
         return stationName;
     } // Standard getter.
 
 
-    public Float getAir_temp() {
-        return airTemp;
+    public Float getAirTemperature() {
+        return airTemperature;
     } // Standard getter.
 
     public Float getWindSpeed() {
@@ -46,10 +45,10 @@ public class WeatherInput {
         // Default constructor required by Hibernate.
     }
 
-    public WeatherInput(String stationName, Integer WMO, Float airTemp, Float windSpeed, String phenomenon, Timestamp timestamp) { // Standard constructor.
+    public WeatherInput(String stationName, Integer WMO, Float airTemperature, Float windSpeed, String phenomenon, Timestamp timestamp) { // Standard constructor.
         this.stationName = stationName;
         this.WMO = WMO;
-        this.airTemp = airTemp;
+        this.airTemperature = airTemperature;
         this.windSpeed = windSpeed;
         this.phenomenon = phenomenon;
         this.timestamp = timestamp;

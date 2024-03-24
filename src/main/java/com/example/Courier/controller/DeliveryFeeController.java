@@ -9,17 +9,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import java.util.Objects;
-import java.util.Optional;
 
-import static com.example.Courier.CourierApplication.repo;
+import static com.example.Courier.CourierApplication.repository;
 
 @RestController
-public class FeeController {
+public class DeliveryFeeController {
 
     @Autowired
     public Environment environment;
 
-    public FeeController(Environment environment) {
+    public DeliveryFeeController(Environment environment) {
         this.environment = environment;
     }
 
@@ -57,10 +56,10 @@ public class FeeController {
         if (vehicle.equals("Scooter") || vehicle.equals("Bike")){
 
             // Checking for ait temperature.
-            if (station.getAir_temp() <= 0 && station.getAir_temp() >= -10)
+            if (station.getAirTemperature() <= 0 && station.getAirTemperature() >= -10)
                 extraFees += 0.5;
 
-            if (station.getAir_temp() < -10)
+            if (station.getAirTemperature() < -10)
                 extraFees += 1.0;
 
 
@@ -118,14 +117,14 @@ public class FeeController {
     }
 
     private static WeatherInput getStationData(String location) {
-        long repositorySize = repo.count();
+        long repositorySize = repository.count();
 
 
 
         for (long i = 0; i < 3; i++) {
             Integer weatherInputIndex = Math.toIntExact(repositorySize - i);
-            WeatherInput weatherInput = repo.findById(weatherInputIndex).orElse(null);
-            if (weatherInput != null && (Objects.equals(weatherInput.getStation_name(), location)))
+            WeatherInput weatherInput = repository.findById(weatherInputIndex).orElse(null);
+            if (weatherInput != null && (Objects.equals(weatherInput.getStationName(), location)))
                 return weatherInput;
         }
         return null;
