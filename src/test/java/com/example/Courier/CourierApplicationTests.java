@@ -18,6 +18,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -59,10 +61,11 @@ import static org.mockito.Mockito.*;
 		when(repository.count()).thenReturn(0L);
 
 		// Act
-		String response = httpRequestController.getFeeRequestResponse("Pärnu","Car");
+		ResponseEntity<String> responseEntity = httpRequestController.getFeeRequestResponse("Pärnu", "Car");
 
 		// Assert
-		assertEquals(response, "There was an issue with loading weather data. Try again later.");
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+		assertEquals("There was an issue with loading weather data. Try again later.", responseEntity.getBody());
 	}
 	@Test
 	void testgetFeeRequestResponse_Pärnu_Bike_WindSpeed25() {
@@ -74,19 +77,21 @@ import static org.mockito.Mockito.*;
 		when(environment.getProperty("location.fees.Pärnu.Bike")).thenReturn("2.0");
 
 		// Act
-		String response = httpRequestController.getFeeRequestResponse("Pärnu","Bike");
+		ResponseEntity<String> responseEntity = httpRequestController.getFeeRequestResponse("Pärnu","Bike");
 
 		// Assert
-		assertEquals(response, "Usage of selected vehicle type is forbidden");
+		assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+		assertEquals("Usage of selected vehicle type is forbidden",responseEntity.getBody());
 	}
 	@Test
 	void testgetFeeRequestResponse_EmptyLocationAndVehicle() {
 
 		// Act
-		String response = httpRequestController.getFeeRequestResponse("","");
+		ResponseEntity<String> responseEntity =  httpRequestController.getFeeRequestResponse("","");
 
 		// Assert
-		assertEquals(response, "Enter city name and vehicle before submitting.");
+		assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+		assertEquals("Enter city name and vehicle before submitting.",responseEntity.getBody());
 	}
 	@Test
 	void testgetFeeRequestResponse_Tallinn_Car() {
@@ -99,10 +104,11 @@ import static org.mockito.Mockito.*;
 		when(environment.getProperty("location.fees.Tallinn-Harku.Car")).thenReturn("4.0");
 
 		// Act
-		String response = httpRequestController.getFeeRequestResponse("Tallinn-Harku","Car");
+		ResponseEntity<String> responseEntity = httpRequestController.getFeeRequestResponse("Tallinn-Harku", "Car");
 
 		// Assert
-		assertEquals(response, "The fee for this delivery is 4.0€.");
+		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+		assertEquals("The fee for this delivery is 4.0€.", responseEntity.getBody());
 	}
 }
 
