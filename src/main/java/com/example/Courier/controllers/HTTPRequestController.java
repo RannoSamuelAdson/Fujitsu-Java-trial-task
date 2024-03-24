@@ -1,4 +1,4 @@
-package com.example.Courier.controller;
+package com.example.Courier.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

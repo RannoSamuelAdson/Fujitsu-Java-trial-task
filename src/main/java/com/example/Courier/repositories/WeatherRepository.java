@@ -1,6 +1,6 @@
-package com.example.Courier.repository;
+package com.example.Courier.repositories;
 
-import com.example.Courier.model.WeatherInput;
+import com.example.Courier.models.WeatherInput;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

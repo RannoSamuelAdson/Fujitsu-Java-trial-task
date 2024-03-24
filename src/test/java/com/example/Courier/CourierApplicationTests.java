@@ -4,10 +4,10 @@ package com.example.Courier;
 
 
 
-import com.example.Courier.controller.DeliveryFeeController;
-import com.example.Courier.controller.HTTPRequestController;
-import com.example.Courier.model.WeatherInput;
-import com.example.Courier.repository.WeatherRepository;
+import com.example.Courier.controllers.DeliveryFeeController;
+import com.example.Courier.controllers.HTTPRequestController;
+import com.example.Courier.models.WeatherInput;
+import com.example.Courier.repositories.WeatherRepository;
 import com.example.Courier.service.CronJobs.WeatherInformationFetcher;
 
 import org.junit.jupiter.api.BeforeEach;

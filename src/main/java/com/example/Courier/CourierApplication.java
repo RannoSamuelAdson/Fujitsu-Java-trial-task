@@ -1,7 +1,7 @@
 package com.example.Courier;
 
 
-import com.example.Courier.repository.WeatherRepository;
+import com.example.Courier.repositories.WeatherRepository;
 import com.example.Courier.service.CronJobs.WeatherInformationFetcher;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

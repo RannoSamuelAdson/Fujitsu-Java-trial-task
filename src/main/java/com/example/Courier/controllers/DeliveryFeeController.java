@@ -1,8 +1,8 @@
-package com.example.Courier.controller;
+package com.example.Courier.controllers;
 
 
 
-import com.example.Courier.model.WeatherInput;
+import com.example.Courier.models.WeatherInput;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;

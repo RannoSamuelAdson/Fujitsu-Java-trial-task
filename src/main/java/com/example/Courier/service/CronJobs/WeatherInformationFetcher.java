@@ -1,8 +1,8 @@
 package com.example.Courier.service.CronJobs;
 
 
-import com.example.Courier.model.WeatherInput;
-import com.example.Courier.repository.WeatherRepository;
+import com.example.Courier.models.WeatherInput;
+import com.example.Courier.repositories.WeatherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -51,16 +51,16 @@ public class WeatherInformationFetcher {
                 for (int i = 0; i < stationNodes.getLength(); i++) {// Getting elements from each station to fill the database.
 
                     Element stationElement = (Element) stationNodes.item(i);// Get element with index i in a station.
-                    String name = getTextContent(stationElement, "name");
+                    String name = trygetTextContent(stationElement, "name");
 
                     if (name.equals("Tallinn-Harku") || name.equals("Tartu-Tõravere") || name.equals("Pärnu")){// Saves into the database only if stations can be used by the app.
                         // This saves database space and makes the process of saving faster overall.
 
 
-                        Integer wmoCode = getIntegerContent(stationElement, "wmocode");// Getting other variables.
-                        Float airTemperature = getFloatContent(stationElement, "airtemperature");
-                        Float windSpeed = getFloatContent(stationElement, "windspeed");
-                        String phenomenon = getTextContent(stationElement, "phenomenon");
+                        Integer wmoCode = trygetIntegerContent(stationElement, "wmocode");// Getting other variables.
+                        Float airTemperature = trygetFloatContent(stationElement, "airtemperature");
+                        Float windSpeed = trygetFloatContent(stationElement, "windspeed");
+                        String phenomenon = trygetTextContent(stationElement, "phenomenon");
 
                         this.weatherRepository.save(new WeatherInput(name,wmoCode,airTemperature,windSpeed,phenomenon,timestamp));// Inputting to a database.
                         }
@@ -74,18 +74,18 @@ public class WeatherInformationFetcher {
             e.printStackTrace();
         }
     }
-    private static String getTextContent(Element element, String tagName) {
+    private static String trygetTextContent(Element element, String tagName) {
         Node node = element.getElementsByTagName(tagName).item(0);
         return (node != null) ? node.getTextContent() : null;
     }
 
-    private static Integer getIntegerContent(Element element, String tagName) {
-        String content = getTextContent(element, tagName);
+    private static Integer trygetIntegerContent(Element element, String tagName) {
+        String content = trygetTextContent(element, tagName);
         return (content != null && !content.isEmpty()) ? Integer.parseInt(content) : null;
     }
 
-    private static Float getFloatContent(Element element, String tagName) {
-        String content = getTextContent(element, tagName);
+    private static Float trygetFloatContent(Element element, String tagName) {
+        String content = trygetTextContent(element, tagName);
         return (content != null && !content.isEmpty()) ? Float.parseFloat(content) : null;
     }
 }

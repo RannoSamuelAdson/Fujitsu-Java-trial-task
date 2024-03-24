@@ -1,4 +1,4 @@
-package com.example.Courier.model;
+package com.example.Courier.models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
