@@ -12,26 +12,29 @@ import java.util.Objects;
 public class WeatherInput {
 
     @Id
-    private String station_name;
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Automatically generated primary key
+    private Integer id; // Primary key
+
+    private String stationName;
     private Integer WMO;
-    private Float air_temp;
-    private Float wind_speed;
+    private Float airTemp;
+    private Float windSpeed;
     private String phenomenon;
-    private Timestamp time_stamp;
+    private Timestamp timestamp;
 
 
 
     public String getStation_name() {
-        return station_name;
+        return stationName;
     } // Standard getter.
 
 
     public Float getAir_temp() {
-        return air_temp;
+        return airTemp;
     } // Standard getter.
 
     public Float getWindSpeed() {
-        return wind_speed;
+        return windSpeed;
     } // Standard getter.
 
     public String getPhenomenon() {
@@ -43,13 +46,13 @@ public class WeatherInput {
         // Default constructor required by Hibernate.
     }
 
-    public WeatherInput(String station_name, Integer WMO, Float air_temp, Float wind_speed, String phenomenon, Timestamp time_stamp) { // Standard constructor.
-        this.station_name = station_name;
+    public WeatherInput(String stationName, Integer WMO, Float airTemp, Float windSpeed, String phenomenon, Timestamp timestamp) { // Standard constructor.
+        this.stationName = stationName;
         this.WMO = WMO;
-        this.air_temp = air_temp;
-        this.wind_speed = wind_speed;
+        this.airTemp = airTemp;
+        this.windSpeed = windSpeed;
         this.phenomenon = phenomenon;
-        this.time_stamp = time_stamp;
+        this.timestamp = timestamp;
     }
 
 }

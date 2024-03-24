@@ -6,7 +6,11 @@ import com.example.Courier.model.WeatherInput;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
+
 import static com.example.Courier.CourierApplication.repo;
 
 @RestController
@@ -24,11 +28,13 @@ public class FeeController {
     public double getDeliveryFee(String location, String vehicle){
 
         WeatherInput station = getStationData(location);
-        if (Objects.equals(station.getStation_name(), "No Such station") && !Objects.equals(location, ""))
+        if (Objects.equals(station, null) && !Objects.equals(location, ""))
             return -1.0;// If this station wasn't in the database.
 
         double fee = calculateRegionalBaseFee(location,vehicle);
-        double extraFees = calculateExtraFees(station,vehicle);
+        double extraFees = 0;
+        if (fee != -200)
+            extraFees = calculateExtraFees(station,vehicle);
         if (extraFees == -1)
             return -2.0;// If weather is hazardous for this vehicle.
 
@@ -114,8 +120,18 @@ public class FeeController {
         return -200.0;//if none of the options apply, therefore location or vehicle hasn't been picked in the interface
     }
 
-    private static WeatherInput getStationData(String location){
-        return repo.findById(location)
-                .orElse(new WeatherInput("No Such station",null,null,null,"Hail",null));//using such a string as a station name so, that I could find out if station exists later on.
+    private static WeatherInput getStationData(String location) {
+        long repositorySize = repo.count();
+        HashSet<WeatherInput> newestWeatherInputs = new HashSet<>();
+
+
+        for (long i = 0; i < 3; i++) {
+            Integer weatherInputIndex = Math.toIntExact(repositorySize - i);
+            WeatherInput weatherInput = repo.findById(weatherInputIndex).orElse(null);
+            if (weatherInput != null && (Objects.equals(weatherInput.getStation_name(), location)))
+                return weatherInput;
+        }
+        return null;
     }
+
 }

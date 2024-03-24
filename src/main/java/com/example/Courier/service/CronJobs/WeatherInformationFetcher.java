@@ -42,9 +42,6 @@ public class WeatherInformationFetcher {
                 Document document = builder.parse(inputStream);// Parsing XML to get it readable for code.
 
                 NodeList stationNodes = document.getElementsByTagName("station");// Separating data by different stations.
-                if (stationNodes.getLength() > 0){// If the web page contained weather information.
-                    this.weatherRepo.deleteAll();// Wipe old records.
-                }
                 //getting timestamp
                 String timestampValue = document.getDocumentElement().getAttribute("timestamp");
                 long unixTimestamp = Long.parseLong(timestampValue);
@@ -60,15 +57,18 @@ public class WeatherInformationFetcher {
                         // This saves database space and makes the process of saving faster overall.
 
 
-                        Integer wmocode = getIntegerContent(stationElement, "wmocode");// Getting other variables.
+                        Integer wmoCode = getIntegerContent(stationElement, "wmocode");// Getting other variables.
                         Float airTemperature = getFloatContent(stationElement, "airtemperature");
                         Float windSpeed = getFloatContent(stationElement, "windspeed");
                         String phenomenon = getTextContent(stationElement, "phenomenon");
 
-                        this.weatherRepo.save(new WeatherInput(name,wmocode,airTemperature,windSpeed,phenomenon,timestamp));// Inputting to a database.
+                        this.weatherRepo.save(new WeatherInput(name,wmoCode,airTemperature,windSpeed,phenomenon,timestamp));// Inputting to a database.
                         }
 
                 }
+            }
+            finally {
+                connection.disconnect();// Disposes the connection after losing the need for it.
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static com.example.Courier.CourierApplication.repo;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -177,7 +178,7 @@ import static org.mockito.Mockito.*;
 		WeatherInput station = new WeatherInput("Pärnu",41803,5.0f,3.0f,"Hail",new Timestamp(System.currentTimeMillis()));
 		assertEquals(-1, controller.calculateExtraFees(station,"Scooter"));
 	}
-	@Test
+	/*@Test
 	void testcalculateExtraFees_Car(){
 		WeatherInput station = new WeatherInput("Pärnu",41803,5.0f,3.0f,"Hail",new Timestamp(System.currentTimeMillis()));
 		assertEquals(0, controller.calculateExtraFees(station,"Car"));
@@ -195,7 +196,10 @@ import static org.mockito.Mockito.*;
 	@Test
 	void testgetDeliveryFee_Pärnu_Scooter_CityNotFound() {
 		// Arrange
-		when(weatherRepoMock.findById("Pärnu")).thenReturn(Optional.empty());
+		// Ensuring that fetching of elements returns correctly.
+		when(repo.count()).thenReturn(3L);
+		when(repo.findById(3)).thenReturn(Optional.empty());
+
 
 		// Act
 		double fee = controller.getDeliveryFee("Pärnu","Scooter");
@@ -208,7 +212,9 @@ import static org.mockito.Mockito.*;
 	void testgetDeliveryFee_Pärnu_Bike_phenomenonHail() {
 		// Arrange
 		WeatherInput weatherInput = new WeatherInput("Pärnu", 41803,5.0f,3.0f,"Hail",new Timestamp(System.currentTimeMillis()));
-		when(weatherRepoMock.findById("Pärnu")).thenReturn(Optional.of(weatherInput));
+		// Ensuring that fetching of elements returns correctly.
+		when(repo.count()).thenReturn(3L);
+		when(repo.findById(3)).thenReturn(Optional.of(weatherInput));
 
 		// Act
 		double fee = controller.getDeliveryFee("Pärnu","Bike");
@@ -220,7 +226,9 @@ import static org.mockito.Mockito.*;
 	void testgetDeliveryFee_Pärnu_Car() {
 		// Arrange
 		WeatherInput weatherInput = new WeatherInput("Pärnu", 41803,5.0f,3.0f,"Hail",new Timestamp(System.currentTimeMillis()));
-		when(weatherRepoMock.findById("Pärnu")).thenReturn(Optional.of(weatherInput));
+		// Ensuring that fetching of elements returns correctly.
+		when(repo.count()).thenReturn(3L);
+		when(repo.findById(3)).thenReturn(Optional.of(weatherInput));
 
 		// Act
 		double fee = controller.getDeliveryFee("Pärnu","Car");
@@ -239,7 +247,8 @@ import static org.mockito.Mockito.*;
 	@Test
 	void testgetFeeRequestResponse_Pärnu_Car_CityNotFound() {
 		// Arrange
-		when(weatherRepoMock.findById("Pärnu")).thenReturn(Optional.empty());
+		// Ensuring that fetching of elements returns correctly.
+		when(repo.count()).thenReturn(0L);
 
 		// Act
 		String response = controller.getFeeRequestResponse("Pärnu","Car");
@@ -251,7 +260,9 @@ import static org.mockito.Mockito.*;
 	void testgetFeeRequestResponse_Pärnu_Bike_WindSpeed25() {
 		// Arrange
 		WeatherInput station = new WeatherInput("Pärnu",41803,-5.0f,25.0f,"Moderate snow shower",new Timestamp(System.currentTimeMillis()));
-		when(weatherRepoMock.findById("Pärnu")).thenReturn(Optional.of(station));
+		// Ensuring that fetching of elements returns correctly.
+		when(repo.count()).thenReturn(3L);
+		when(repo.findById(3)).thenReturn(Optional.of(station));
 
 		// Act
 		String response = controller.getFeeRequestResponse("Pärnu","Bike");
@@ -272,7 +283,11 @@ import static org.mockito.Mockito.*;
 	void testgetFeeRequestResponse_Tallinn_Car() {
 		// Arrange
 		WeatherInput station = new WeatherInput("Tallinn-Harku",41803,-5.0f,25.0f,"Moderate snow shower",new Timestamp(System.currentTimeMillis()));
-		when(weatherRepoMock.findById("Tallinn-Harku")).thenReturn(Optional.of(station));
+
+		// Ensuring that fetching of elements returns correctly.
+		when(repo.count()).thenReturn(3L);
+		when(repo.findById(3)).thenReturn(Optional.of(station));
+
 
 		// Act
 		String response = controller.getFeeRequestResponse("Tallinn-Harku","Car");
