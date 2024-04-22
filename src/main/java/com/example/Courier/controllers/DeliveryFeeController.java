@@ -53,9 +53,6 @@ public class DeliveryFeeController {
 
             //Checking for weather phenomenons, such as rain or snow.
 
-            if (weatherSeverity == 1); // Since having no difficult weather phenomenon is the norm in Estonia,
-                // it would be wasteful to check for all other situations each time this is the case.
-
             if (weatherSeverity == 2)// If raining,
                 extraFees += 0.5;
 
